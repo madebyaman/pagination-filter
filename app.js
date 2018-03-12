@@ -61,6 +61,60 @@ function appendPageLinks(students) {
   page.appendChild(newPaginationDiv);
 }
 
+// Create search div and append it the document
+const searchDiv = document.createElement('div');
+searchDiv.classList.add('student-search');
+const searchInput = document.createElement('input');
+searchInput.setAttribute('type', 'text');
+searchInput.setAttribute('id', 'search');
+searchInput.setAttribute('placeholder', 'Search for students...');
+searchDiv.appendChild(searchInput);
+const searchButton = document.createElement('button');
+searchButton.setAttribute('name', 'submit');
+searchButton.textContent = 'Search';
+searchDiv.appendChild(searchButton);
+document.querySelector('.page-header').appendChild(searchDiv);
+
+function searchList() {
+  // Get search input value and convert it to lowercase
+  let searchText = searchInput.value.toLowerCase();
+
+  // Hide previous message, pagination link, and student data if available
+  let prevMessage = document.querySelector('.page > p');
+  let paginationLink = document.querySelector('.pagination');
+  hideStudents();
+  if (prevMessage) {
+    page.removeChild(prevMessage);
+  }
+  if (paginationLink) {
+    page.removeChild(paginationLink);
+  }
+
+  // Add matched students to the array
+  let matched = [];
+  studentList.forEach(student => {
+    let studentName = student.querySelector('.student-details h3').textContent;
+    let studentEmail = student.querySelector('.student-details .email').textContent;
+    if (studentName.toLowerCase().includes(searchText) || studentEmail.toLowerCase().includes(searchText)) {
+      matched.push(student);
+    }
+  })
+
+  // Show message if no student matched the search input
+  if (matched.length === 0) {
+    let message = document.createElement('p');
+    message.textContent = 'Sorry, no student found';
+    page.appendChild(message);
+  }
+
+  // Show matched student and add page links if matched array contains more than 10 items
+  if (matched.length > 10) {
+    appendPageLinks(matched);
+  }
+  showPage(1, matched);
+  searchInput.value = '';
+}
+
 // Add click event handler to each anchor in pagination div
 paginationDiv.addEventListener('click', (e) => {
   // Prevent browser from updating URL
@@ -78,50 +132,5 @@ paginationDiv.addEventListener('click', (e) => {
   }
 })
 
-// Create search div
-const searchDiv = document.createElement('div');
-searchDiv.classList.add('student-search');
-const searchInput = document.createElement('input');
-searchInput.setAttribute('type', 'text');
-searchInput.setAttribute('id', 'search');
-searchInput.setAttribute('placeholder', 'Search for students...');
-searchDiv.appendChild(searchInput);
-const searchButton = document.createElement('button');
-searchButton.setAttribute('name', 'submit');
-searchButton.textContent = 'Search';
-searchDiv.appendChild(searchButton);
-document.querySelector('.page-header').appendChild(searchDiv);
-
-function searchList() {
-  let searchText = searchInput.value.toLowerCase();
-
-  let prevMessage = document.querySelector('.page > p');
-  let paginationLink = document.querySelector('.pagination');
-  hideStudents();
-  if (prevMessage) {
-    page.removeChild(prevMessage);
-  }
-  if (paginationLink) {
-    page.removeChild(paginationLink);
-  }
-  let matched = [];
-  studentList.forEach(student => {
-    let studentName = student.querySelector('.student-details h3').textContent;
-    let studentEmail = student.querySelector('.student-details .email').textContent;
-    if (studentName.toLowerCase().includes(searchText) || studentEmail.toLowerCase().includes(searchText)) {
-      matched.push(student);
-    }
-  })
-  if (matched.length === 0) {
-    let message = document.createElement('p');
-    message.textContent = 'Sorry, no student found';
-    page.appendChild(message);
-  }
-  if (matched.length > 10) {
-    appendPageLinks(matched);
-  }
-  showPage(1, matched);
-  searchInput.value = '';
-}
-
+// Click event handler for the search functionality
 searchButton.addEventListener('click', searchList);
