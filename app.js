@@ -3,15 +3,18 @@ const page = document.querySelector('.page');
 // Customize how many students to display in each page by changing this variable
 const studentToDisplay = 10;
 
+// Add empty pagination div
+const paginationDiv = document.createElement('div');
+paginationDiv.classList.add('pagination');
+page.appendChild(paginationDiv);
+
 // Intialize the page
-function intializePage() {
-  appendPageLinks(studentList);
-  hideStudents();
-  showPage(1, studentList);
+function intializePage(students) {
+  appendPageLinks(students);
+  showPage(1, students);
 }
-intializePage();
-const paginationDiv = document.querySelector('.pagination');
-paginationDiv.querySelector('a').classList.add('active');
+intializePage(studentList);
+
 
 // Hide student list function
 function hideStudents() {
@@ -23,11 +26,10 @@ function hideStudents() {
 
 // Show students in each page
 function showPage(pageNumber, students) {
-  // Calculate beginning number for displaying studentS
+  // Calculate beginning and ending number for displaying students
   let studentListBegin = ((pageNumber - 1) * studentToDisplay);
-  // Calculate ending number for student list
   let studentListEnd = (pageNumber * studentToDisplay);
-  // In the last page, for loop may result in error without this if statement
+  // If student list ending is more than students array length, change its value
   if (studentListEnd > students.length) {
     studentListEnd = students.length;
   }
@@ -40,28 +42,28 @@ function showPage(pageNumber, students) {
 
 // Add pagination links below the content.
 function appendPageLinks(students) {
-  // Create pagination div
-  let newPaginationDiv = document.createElement('div');
-  newPaginationDiv.classList.add('pagination');
-  newPaginationDiv.innerHTML = `<ul>`;
+  let paginationLink = document.createElement('ul');
   // Calculate number of pages required for displaying student data
   const pagesRequired = Math.ceil(students.length / studentToDisplay);
   // add li to pagination div for each page
   for (let i = 1; i < pagesRequired + 1; i++) {
-    newPaginationDiv.innerHTML += `<li>
+    paginationLink.innerHTML += `<li>
               <a href="#">` + i + `</a>
             </li>`;
   }
-  newPaginationDiv.innerHTML += `</ul>`;
-  // If pagination div existed before, remove it.
-  if (document.querySelector('.pagination')) {
-    page.removeChild(document.querySelector('.pagination'));
+  // If pagination links existed before, remove them.
+  if (document.querySelector('.pagination ul')) {
+    paginationDiv.removeChild(document.querySelector('.pagination ul'));
   }
-  // append new paginationDiv to DOM
-  page.appendChild(newPaginationDiv);
+
+  if (students.length > studentToDisplay) {
+    // append new paginationDiv to DOM
+    paginationDiv.appendChild(paginationLink);
+    paginationLink.querySelector('a').classList.add('active');
+  }
 }
 
-// Create search div and append it the document
+// Create search div and append it to the document
 const searchDiv = document.createElement('div');
 searchDiv.classList.add('student-search');
 const searchInput = document.createElement('input');
@@ -81,13 +83,13 @@ function searchList() {
 
   // Hide previous message, pagination link, and student data if available
   let prevMessage = document.querySelector('.page > p');
-  let paginationLink = document.querySelector('.pagination');
+  let paginationLink = document.querySelector('.pagination ul');
   hideStudents();
   if (prevMessage) {
     page.removeChild(prevMessage);
   }
   if (paginationLink) {
-    page.removeChild(paginationLink);
+    paginationDiv.removeChild(paginationLink);
   }
 
   // Add matched students to the array
@@ -103,34 +105,31 @@ function searchList() {
   // Show message if no student matched the search input
   if (matched.length === 0) {
     let message = document.createElement('p');
-    message.textContent = 'Sorry, no student found';
+    message.innerHTML = 'Sorry, no student found';
     page.appendChild(message);
+  } else {
+    // Show matched student and add page links if matched array contains more than 10 items
+    intializePage(matched);
   }
-
-  // Show matched student and add page links if matched array contains more than 10 items
-  if (matched.length > 10) {
-    appendPageLinks(matched);
-  }
-  showPage(1, matched);
   searchInput.value = '';
 }
+
+// Click event handler for the search functionality
+searchButton.addEventListener('click', searchList);
 
 // Add click event handler to each anchor in pagination div
 paginationDiv.addEventListener('click', (e) => {
   // Prevent browser from updating URL
   e.preventDefault();
   const anchor = e.target.closest('a');
-  // Remove active class from each pagination link
-  const activeAnchors = paginationDiv.querySelectorAll('li .active');
-  activeAnchors.forEach(anchor => {
-    anchor.classList.remove('active');
-  })
   if (anchor) {
+    // Remove active class from each pagination link
+    const activeAnchors = paginationDiv.querySelectorAll('li .active');
+    activeAnchors.forEach(anchor => {
+      anchor.classList.remove('active');
+    })
     let pageNumber = anchor.textContent;
     showPage(pageNumber, studentList);
     anchor.classList.add('active');
   }
 })
-
-// Click event handler for the search functionality
-searchButton.addEventListener('click', searchList);
