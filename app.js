@@ -15,7 +15,6 @@ function initializePage(students) {
 }
 initializePage(studentList);
 
-
 // Hide student list function
 function hideStudents() {
   studentList.forEach(student => {
@@ -111,9 +110,10 @@ function searchList() {
 			<h3>Sorry, no student found</h3>
 			<p>Your search query does not match any student name or email.</p>`;
   } else if (searchInput.value === '') {
+    // If no text is entereted, go back to student details
     initializePage(studentList)
   } else {
-    // Show matched student and add page links if matched array contains more than 10 items
+    // Else show matched students and add dynamic message
     let result = (matched.length === 1) ? "result" : "results";
     message.innerHTML = `
 			<h3>${matched.length}, ${result} found</h3>

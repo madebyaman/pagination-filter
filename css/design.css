@@ -1,7 +1,7 @@
 :root {
 	--blue: #4ba6c3;
 }
-		
+
 body {
   background-color: #e1f1f6;
   font-family: Helvetica, sans-serif;
@@ -89,7 +89,7 @@ body {
 .student-details h3 {
   margin: 4px 0 2px 0;
   font-weight: bold;
-  color: #4ba6c3;
+  color: var(--blue);
 }
 
 .student-details .email {
