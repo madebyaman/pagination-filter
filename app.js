@@ -9,11 +9,11 @@ paginationDiv.classList.add('pagination');
 page.appendChild(paginationDiv);
 
 // Intialize the page
-function intializePage(students) {
+function initializePage(students) {
   appendPageLinks(students);
   showPage(1, students);
 }
-intializePage(studentList);
+initializePage(studentList);
 
 
 // Hide student list function
@@ -82,11 +82,11 @@ function searchList() {
   let searchText = searchInput.value.toLowerCase();
 
   // Hide previous message, pagination link, and student data if available
-  let prevMessage = document.querySelector('.page > p');
+  let prevMessage = document.querySelector('.page-header .search-message');
   let paginationLink = document.querySelector('.pagination ul');
   hideStudents();
   if (prevMessage) {
-    page.removeChild(prevMessage);
+    document.querySelector('.page-header').removeChild(prevMessage);
   }
   if (paginationLink) {
     paginationDiv.removeChild(paginationLink);
@@ -103,33 +103,60 @@ function searchList() {
   })
 
   // Show message if no student matched the search input
+	let message = document.createElement('div');
+	message.classList.add('search-message');
   if (matched.length === 0) {
-    let message = document.createElement('p');
-    message.innerHTML = 'Sorry, no student found';
-    page.appendChild(message);
+    
+    message.innerHTML = `
+			<h3>Sorry, no student found</h3>
+			<p>Your search query does not match any student name or email.</p>`;  
+  } else if (searchInput.value === '') {
+    initializePage(studentList)
   } else {
     // Show matched student and add page links if matched array contains more than 10 items
-    intializePage(matched);
-  }
+		let result = (matched.length === 1) ? "result" : "results";
+		message.innerHTML = `
+			<h3>${matched.length}, ${result} found</h3>
+			<p>Your search query <span>${searchInput.value}</span>, matched ${matched.length} ${result}</p>`;
+    initializePage(matched);
+	}
+	document.querySelector('.page-header').appendChild(message);
   searchInput.value = '';
+	
+	// Add click event handler to each anchor in pagination div
+	paginationDiv.addEventListener('click', e => {
+		// Prevent browser from updating URL
+		e.preventDefault();
+		const anchor = e.target.closest('a');
+		if (anchor) {
+			// Remove active class from each pagination link
+			const activeAnchors = paginationDiv.querySelectorAll('li .active');
+			activeAnchors.forEach(anchor => {
+				anchor.classList.remove('active');
+			})
+			let pageNumber = anchor.textContent;
+			showPage(pageNumber, matched);
+			anchor.classList.add('active');
+		}
+	})
 }
 
 // Click event handler for the search functionality
 searchButton.addEventListener('click', searchList);
 
 // Add click event handler to each anchor in pagination div
-paginationDiv.addEventListener('click', (e) => {
+paginationDiv.addEventListener('click', e => {
   // Prevent browser from updating URL
   e.preventDefault();
   const anchor = e.target.closest('a');
   if (anchor) {
-    // Remove active class from each pagination link
-    const activeAnchors = paginationDiv.querySelectorAll('li .active');
-    activeAnchors.forEach(anchor => {
-      anchor.classList.remove('active');
-    })
-    let pageNumber = anchor.textContent;
-    showPage(pageNumber, studentList);
-    anchor.classList.add('active');
+		// Remove active class from each pagination link
+		const activeAnchors = paginationDiv.querySelectorAll('li .active');
+		activeAnchors.forEach(anchor => {
+			anchor.classList.remove('active');
+		})
+		let pageNumber = anchor.textContent;
+		showPage(pageNumber, students);
+		anchor.classList.add('active');
   }
 })
